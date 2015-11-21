@@ -4,14 +4,17 @@ var _ = require('lodash');
 var rest = require('restler');
 var nyw = require('../lib/nyw');
 var sms = require('../lib/sms');
+var pois = nyw.getRanges();
 
 router.get('/poi-form', function(req, res) {
   res.render('../views/poi-form.html', {
-    pois: nyw.getRanges()
+    pois: pois
   });
 });
 
 router.post('/poi/vehicles', function(req, res, next) {
+  var poi = pois[req.body.poi];
+  
   if(!nyw.isPOI(req.body.poi)) {
     return res.send({"error": "invalid POI"});
   }
@@ -19,28 +22,25 @@ router.post('/poi/vehicles', function(req, res, next) {
     return res.send({"error": "invalid phone number"});
   }
   
-  // validate
-  nyw.findVehiclesInRange(req.body.poi, function(vehicles, positions){
+  nyw.findVehiclesInRange(poi.key, function(vehicles, positions){
     if(vehicles.length) {
-    /*
       sms.send({
         to: '+1' + req.body.to,
-        body: 'Bus arrived @ ' + req.body.poi,
+        body: 'Bus arrived @ ' + poi.name,
         complete: function(error, message) {
           res.send({
             'vehicles': vehicles,
-            'sms_sent': true
+            'msg': 'Bus arrived @ ' + poi.name,
+            'sms_sent': true,
+            'poi': poi
           });
         }
       });
-    */
-      res.send({
-        'vehicles': vehicles,
-        'sms_sent': true
-      });
     } else {
       res.send({
-        'vehicles': []
+        'vehicles': [],
+        'poi': poi,
+        'sms_sent': false
       });
     }
   });

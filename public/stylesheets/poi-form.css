@@ -1,0 +1,26 @@
+.modal {
+  z-index: 2000;
+}
+.loader {
+  font-size: .75em;
+}
+.loader-icon {
+  height: 40px;
+  width: 40px;
+  display: block;
+  margin: 20px auto;
+  background-image: url('https://www.primeagent.com/Content/images/ajax-loader.gif');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+.started .btn-start,
+.btn-stop {
+  display: none;
+}
+.started .btn-stop {
+  display: block;
+}
+.sms-popover {
+  margin: 100px 0 0 65px;
+  width: 300px;
+}

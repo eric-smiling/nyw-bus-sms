@@ -1,34 +1,7 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
-    <style>
-      .modal {
-        z-index: 2000;
-      }
-      .loader {
-        font-size: .75em;
-        text-align: center;
-      }
-      .loader-icon {
-        height: 40px;
-        width: 40px;
-        display: block;
-        margin: 20px auto;
-        background-image: url('https://www.primeagent.com/Content/images/ajax-loader.gif');
-        background-size: contain;
-        background-repeat: no-repeat;
-      }
-      .started .btn-start,
-      .btn-stop {
-        display: none;
-      }
-      .started .btn-stop {
-        display: block;
-      }
-      .sms-popover {
-        margin: 100px 0 0 65px;
-      }
-    </style>
+        <link rel="stylesheet" type="text/css" href="/stylesheets/poi-form.css" />
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   </head>
@@ -86,69 +59,7 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-    <script>
-      (function($){
-        $(document.body).on('submit', '.sms-form', function(evt) {
-          var $form = $(evt.target);
-          var $btn = $($form.find('input[type=submit]'));
-          var interval = {
-            id: null,
-            sms_max: 3,
-            sms_count: 0,
-            frequency: 5000,
-            pause_length: 120000,
-            start: function(){
-              var self = this;
-              if(this.sms_count >= this.sms_max) {
-                return;
-              }
-              self.id = setInterval(function(){
-                $.ajax({
-                  type:  $form.attr('method'),
-                  url: $form.attr('action'),
-                  data: $form.serialize(),
-                  success: function(response) {
-                    if(response.vehicles && response.sms_sent) {
-                      self.sms_count++;
-                      self.stop();
-                      self.schedule();
-                    }
-                    else if(response.message) {
-                      alert(response.message);
-                    }
-                    console.log(response);
-                  }
-                });
-              }, self.frequency);
-              self.onStart();
-            },
-            stop: function() {
-              clearTimeout(this.id);
-              this.onStop();
-            },
-            schedule: function() {
-              setTimeout((function(){
-                this.start();
-              }).bind(this), this.pause_length);
-            },
-            // ui stuff.. move / use pub sub
-            onStop: function() {
-              $('#confirmation-modal').modal();
-            },
-            onStart: function() {
-              // make it stoppable
-              $form.addClass('started');
-              $form.find('.loader').show();
-            }
-          };
-          
-          // stop the form submission
-          evt.preventDefault();
-          
-          // start the interval
-          interval.start();
-        }); 
-      })(window.jQuery);
+    <script src="/javascripts/poi-form.js"></script>
     </script>
   </body>
 </html>
