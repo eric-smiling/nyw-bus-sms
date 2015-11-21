@@ -2,23 +2,8 @@
   <head>
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
     <style>
-      body {
-        margin: 0;
-        padding: 0;
-      }
       .modal {
         z-index: 2000;
-      }
-      .sms-popover {
-        position: absolute;
-        max-width: 338px;
-      }
-      .sms-popover-entrance {
-        top: 28px;
-        left: 315px;
-      }   
-      .sms-popover.started >.arrow {
-        margin-top: -70px;
       }
       .loader {
         font-size: .75em;
@@ -33,28 +18,49 @@
         background-size: contain;
         background-repeat: no-repeat;
       }
-      .sms-popover.started .btn-start,
+      .started .btn-start,
       .btn-stop {
         display: none;
       }
-      .sms-popover.started .btn-stop {
+      .started .btn-stop {
         display: block;
+      }
+      .sms-popover {
+        margin: 100px 0 0 65px;
       }
     </style>
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   </head>
   <body>
-    <div class="sms-popover-entrance sms-popover popover left show">
-      <div class="arrow"></div>
-      <h3 class="popover-title">SMS me each time the bus reaches this point</h3>
+    <iframe
+      src="http://tds1.saucontech.com/tds-map/nyw/routemapc.htm?id=52"
+      width="1200"
+      height="1000"
+      frameborder="0"
+      scrolling="no"
+    ></iframe>
+    <div class="sms-popover popover show">
+      <div class="popover-title">SMS me when the bus arrives</div>
       <div class="popover-content">
-        <form method="POST" action="/poi/vehicles">
-          <input type="hidden" name="poi" value="entrance" />
-          <input required type="tel" name="to" pattern="\d{10}" class="form-control" placeholder="SMS/Mobile Number" />
-          <h5><em>Format: 9175551212</em></h5>
-          <input type="submit" class="btn-start btn btn-primary form-control" value="START" />
-          <input type="button" class="btn-stop btn btn-warning form-control" value="STOP" onClick="javascript:window.location.reload();" />
+        <form method="POST" class="sms-form" action="/poi/vehicles">
+          <div class="form-group">
+            <label>Point of Interest</label>
+            <select name="poi" class="form-control">
+              {% for key, poi in pois %}
+                <option value="{{ key }}">{{ poi.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Mobile Number</label>
+            <input required type="tel" name="to" pattern="\d{10}" class="form-control" placeholder="SMS/Mobile Number" />
+            <small>Format: 9175551212</small>
+          </div>
+          <div class="form-group">
+            <input type="submit" class="btn-start btn btn-primary form-control" value="START" />
+            <input type="button" class="btn-stop btn btn-warning form-control" value="STOP" onClick="javascript:window.location.reload();" />
+          </div>
           <div class="loader" style="display: none;">
             <div>
               <strong>Each time</strong> the bus arrives, you will recieve one text message. <br />
@@ -80,21 +86,11 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-    <iframe
-      src="http://tds1.saucontech.com/tds-map/nyw/routemapc.htm?id=52"
-      width="1200"
-      height="1200"
-      frameborder="0"
-      scrolling="no"
-    ></iframe>
     <script>
       // TODO: test max f(x)
-      // TODO: add more ranges
-      // TODO: modify map
-      // TODO: separate interval from form in code
       // TODO: hide/don't count incorrect bus ids
       (function($){
-        $(document.body).on('submit', '.sms-popover form', function(evt) {
+        $(document.body).on('submit', '.sms-form', function(evt) {
           var $form = $(evt.target);
           var $btn = $($form.find('input[type=submit]'));
           var interval = {
@@ -143,7 +139,7 @@
             },
             onStart: function() {
               // make it stoppable
-              $form.closest('.sms-popover').addClass('started');
+              $form.addClass('started');
               $form.find('.loader').show();
             }
           };
