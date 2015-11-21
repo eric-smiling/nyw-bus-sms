@@ -1,39 +1,21 @@
 {
-  "near_back_entrance": {
+  "back_entrance": {
     "coordinates": [
       {
-        "x": 600,
-        "y": 127
+        "x": 650,
+        "y": 90
       }
     ],
-    "name": "Near back entrance"
+    "name": "Back entrance"
   },
-  "entering_back_entrance": {
-    "coordinates": [
-      {
-        "x": 582,
-        "y": 167
-      }
-    ],
-    "name":"Entering back entrance"
-  },
-  "turning_onto_river_from_terminal": {
+  "riverwalk": {
     "coordinates": [
       {
         "x": 306,
         "y": 529
       }
     ],
-    "name": "Turning onto River rd. near terminal"
-  },
-  "river_starbucks": {
-    "coordinates": [
-      {
-        "x": 312,
-        "y": 478
-      }
-    ],
-    "name": "River rd. near Starbucks"
+    "name": "Riverwalk"
   },
   "river_front_entrance": {
     "coordinates": [
@@ -42,7 +24,7 @@
         "y": 322
       }
     ],
-    "name": "River rd. near front entrance"
+    "name": "Front entrance (on River rd)"
   },
   "terminal": {
     "coordinates": [
@@ -51,6 +33,6 @@
         "y": 611
       }
     ],
-    "name": "Ferry terminal"
+    "name": "Next to ferry terminal"
   }
 }

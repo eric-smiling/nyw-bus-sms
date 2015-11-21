@@ -1,19 +1,9 @@
-// TODO: prevent spam
-// TODO: keep list of active SMS users
-// TODO: hide/don't count incorrect bus ids
-// TODO: keep track of actual bus id based on entrance entry
-
 var express = require('express');
 var router = express.Router();
 var _ = require('lodash');
 var rest = require('restler');
 var nyw = require('../lib/nyw');
 var sms = require('../lib/sms');
-
-
-router.get('/map', function(req, res) {
-  res.render('../views/map.html');
-});
 
 router.get('/poi-form', function(req, res) {
   res.render('../views/poi-form.html', {
