@@ -1,0 +1,223 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+
+  <title>North Intra Loop</title>
+  	<meta charset="UTF-8">
+
+    <SCRIPT language="JavaScript">
+    <!--
+
+    var backgroundImage;
+    var directionImage;
+    var youAreHereImage;
+    
+    if (document.images)
+    {
+      backgroundImage = new Image(830, 952);
+      backgroundImage.src = 'http://tds1.saucontech.com/tds-map/nyw/images/routemaps/northintraloop.png';
+      directionImage = new Image(1944, 54);
+      directionImage.src = 'http://tds1.saucontech.com/tds-map/nyw/images/tile_36x1.png';
+      youAreHereImage = new Image(42, 42);
+      youAreHereImage.src = 'http://tds1.saucontech.com/tds-map/nyw/images/youarehere.png';
+    }
+
+    //-->
+    </SCRIPT>     
+<script type="text/javascript" language="JavaScript">
+  (function(){
+    var userXY;
+    var gpsReceived = false;
+    var mapTranslation;
+    var currentPosition;
+       
+    function fixDrawImage()
+    {
+    var factor = 1;
+    if (window.devicePixelRatio)
+     factor = 1/window.devicePixelRatio;
+            drawImage = CanvasRenderingContext2D.prototype.drawImage; 
+        CanvasRenderingContext2D.prototype.drawImage = function (image, 
+    sx, sy, sw, sh, dx, dy, dw, dh) { 
+            for (var i = 1; i < 5; i++) 
+                arguments[i] = arguments[i] * factor; 
+            drawImage.apply (this, arguments); 
+        }; 
+    } 
+    
+    
+    function hasDrawImageScalingBug() { 
+            var iw = 1; 
+            var ih = 1; 
+            var img = document.createElement("canvas"); 
+            img.width = iw; 
+            img.height = ih; 
+            var ictx = img.getContext("2d"); 
+            ictx.fillStyle = "#ffffff"; 
+            ictx.fillRect(0, 0, iw, ih); 
+            var bw = 100; 
+            var bh = 100; 
+            var buffer = document.createElement("canvas"); 
+            buffer.width = bw; 
+            buffer.height = bh; 
+            var bctx = buffer.getContext("2d"); 
+            bctx.clearRect(0, 0, bw, bh); 
+            bctx.drawImage(img, bw/2, bh/2); 
+            var imageData = bctx.getImageData(0, 0, bw, bh); 
+            var sample = imageData.data[bw/2*bw*4+bh/2*4]; 
+            if (sample == 0)  
+                    return true;
+        return false;                 
+    } 
+    
+    
+    var timer;
+    var bugFactor;
+    
+    function init()
+    {
+       var img = document.createElement("canvas");
+       img.setAttribute("id","c");
+       if (hasDrawImageScalingBug() && window.devicePixelRatio)
+       { 
+          img.width = 830 * window.devicePixelRatio;
+          img.height = 952 * window.devicePixelRatio;
+          fixDrawImage();
+          bugFactor = 1;
+            if (window.devicePixelRatio)
+                bugFactor = 1/window.devicePixelRatio;
+          
+       }
+       else 
+       { 
+          img.width = 830;
+          img.height = 952;
+       }
+       document.body.appendChild(img); 
+       
+       hasDrawImageScalingBug();
+       drawBackground();
+       refreshVehicles();
+       if (navigator && navigator.geolocation) 
+       {
+           navigator.geolocation.getCurrentPosition(updatedPosition, onError);
+           navigator.geolocation.watchPosition(updatedPosition);
+       } 
+    }
+    
+    function updatedPosition(position) 
+    {
+    //  alert(position.coords.latitude + ":" + position.coords.longitude);
+      currentPosition = position;
+      if (!mapTranslation)
+      {
+         var client = new XMLHttpRequest();
+         client.onreadystatechange = saveTranslation;
+         client.open("GET", "nywmapTranslation.do?id=52");
+         client.send();
+      }
+      else
+         drawUserLocation();   
+    }
+    
+    function saveTranslation() 
+    {
+       if(this.readyState == 4 && this.status == 200) 
+          // so far so good
+          if(this.responseText != null)
+          {
+             // success!
+             mapTranslation = eval('(' + this.responseText + ')');
+             drawUserLocation();
+          }
+    }
+    
+    function drawUserLocation()
+    {
+       if (mapTranslation && currentPosition && currentPosition.coords && currentPosition.coords.latitude > mapTranslation.mapBoundsMinY 
+            && currentPosition.coords.latitude < mapTranslation.mapBoundsMaxY
+        && currentPosition.coords.longitude > mapTranslation.mapBoundsMinX
+        && currentPosition.coords.longitude < mapTranslation.mapBoundsMaxX)
+       {
+          var deviceX = (((currentPosition.coords.longitude - mapTranslation.mapBoundsMinX) / mapTranslation.mapConversionX) + 0.5);
+        var deviceY = (((mapTranslation.mapBoundsMaxY - currentPosition.coords.latitude) / mapTranslation.mapConversionY) + 0.5);
+          var canvas = document.getElementById('c');  
+          if (canvas != null)
+          {  
+             ctx = canvas.getContext('2d');
+             if (ctx != null)
+                ctx.drawImage(youAreHereImage, deviceX - 21, deviceY - 21, 42, 42);
+          }
+       }
+       else   
+       {
+          if (!gpsReceived)
+             gpsReceived = true;
+       }        
+    
+       
+    }
+    
+    function onError() 
+    {
+    }
+    
+    function drawBackground()
+    {
+       var ctx;
+       var canvas = document.getElementById('c');  
+       if (canvas != null)
+       {  
+         ctx = canvas.getContext('2d');
+         if (ctx != null)
+            ctx.drawImage(backgroundImage,0,0);
+       }
+       return ctx;
+    }
+    
+    function refreshVehicles()
+    {
+       var client = new XMLHttpRequest();
+       client.onreadystatechange = handler;
+       client.open("GET", "/faux-vehicle-positions?time=" + new Date().getTime());
+       client.setRequestHeader ("Accept", "application/json");
+       client.send();
+    }  
+    
+    function handler() 
+    {
+       if(this.readyState == 4)
+       {
+          if (this.status == 200)
+          { 
+             // so far so good
+             if(this.responseText != null)
+             {
+                // success!
+                var ll = eval(this.responseText);
+                drawBus(ll);
+             }
+          }
+          setTimeout(refreshVehicles, "15000");
+       }     
+             
+    }
+    
+    function drawBus(ll)
+    {
+      var ctx = drawBackground();
+      for(var i in ll) 
+        ctx.drawImage(directionImage, ll[i].i + 1, 0, 52, 52, ll[i].x - 26, ll[i].y - 26, 52, 52);
+      drawUserLocation();  
+    }
+    
+    window.onload = init;
+  })();
+</script>
+</head>
+<body>
+<h3>Route: North Intra Loop</h3>
+</body>
+
+</html>
